@@ -1,0 +1,101 @@
+body {
+	background-color: black;
+	color: white;
+	text-align: center;
+}
+
+.whiteBorder {
+    border: 3px solid white;
+    overflow-wrap: break-word;
+    overflow: auto;
+    height: 700px;
+}
+
+.halfSizedWhiteBorder {
+	border: 3px solid white;
+    overflow-wrap: break-word;
+    overflow: auto;
+    height: 350px;
+}
+
+a {
+	color: red;
+}
+
+a:hover {
+	color: white;
+	text-decoration: none;
+}
+
+.comments {
+	background-color: #8B1A1A;
+	text-align: left;
+}
+
+.comment {
+	height: 250px;
+}
+
+.delete {
+	background-color: black;
+	color: white;
+}
+
+.delete:hover {
+	background-color: white;
+	color: black;
+}
+
+.scroll::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.9);
+	border-radius: 10px;
+	background-color: black;
+}
+
+.scroll::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: #F5F5F5;
+}
+
+.scroll::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	background-color: #D62929;
+	background-image: -webkit-linear-gradient(90deg,
+											  transparent,
+											  rgba(0, 0, 0, 0.4) 50%,
+											  transparent,
+											  transparent)
+}
+
+.content {
+	text-align: left;
+}
+
+.socIcon {
+	margin: 20px;
+	display: inline-block;
+}
+
+.social {
+	width: 62px;
+	height: 62px;
+	background-color: white;
+}
+
+.social:hover{
+	transition: all 1s ease;
+	-webkit-transform:scale(1.5); 
+    -moz-transform:scale(1.5); 
+    -ms-transform:scale(1.5); 
+    -o-transform:scale(1.5); 
+     transform:scale(1.5);
+     z-index: +10;
+}
+
+footer {
+	text-align: center;
+	padding: 30px;
+}
