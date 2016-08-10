@@ -3,11 +3,11 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 // Include the Main Component
-var Parent = require('./Components/Parent')
+var Main = require('./Components/Main')
 
-// This code here allows us to render our main component (in this case "Parent")
+// This code here allows us to render our main component (in this case "Main")
 ReactDOM.render(
 
-	<Parent />,
+	<Main />,
 	document.getElementById('app')
 )

@@ -16,7 +16,7 @@ var collections = ["articles"];
 // 'scrape', ['articles', 'comments'] (other info for non heroku use)
 
 // creates a databse in mongo called scrape with two collections: articles and comments
-var db = mongojs(/*process.env.MONGODB_URI, */"nytreact", ['articles']);
+var db = mongojs(/*process.env.MONGODB_URI, */databaseUrl, collections);
 
 // lets us know if there is an error with the database if it doesn't turn on
 db.on('error', function(err) {
@@ -27,10 +27,18 @@ db.on('error', function(err) {
 app.use(express.static(process.cwd() + '/assets'));
 
 // BodyParser interprets data sent to the server
+app.use(logger('dv'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.text());
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
+
+
+
+
+//*************
+
+
 
 // requesting the html of samdavidson.net/blog
 request("http://www.nytimes.com/", function (error, response, html) {
@@ -49,12 +57,12 @@ request("http://www.nytimes.com/", function (error, response, html) {
 		// grabs the text in the a tag within the h2 tag (title)
 		var title = $(this).text();
 		// grabs the href attribute of the a tag within the h2 tag (url)
-		var link = $(this).attr('href');
+		var date = Date.now();
 		// creats a variable to store the content that is concatinated in the for each below
 		var content = "";
 
 		// scrapes and concatinates content p tags from each article adding a space inbetween p tags within an article
-		$('div.entry').find('p').each(function(j, element) {
+		$('p.summary').each(function(j, element) {
 			content += (" " + $(this).text());
 			
 		}); // end of content scrape
@@ -62,34 +70,9 @@ request("http://www.nytimes.com/", function (error, response, html) {
 		// pushes title url and content into the result array
 		result.push({
 			title: title,
-			url: link, 
+			date: date, 
 			content: content
 		}); // end of push		
-			
-
-
-		// db.articles.find({},function (err, posts) {
-		// 	// console.log(posts);
-		// 	posts.forEach(function(doc, index, array) {
-				
-		// 		if(err) throw err;
-
-		// 		// if the article title is already in the collection don't insert it
-		// 		result.forEach(function(scrappedResult){
-		// 			if (doc.title == scrappedResult.title) {
-		// 				console.log("This article is already in the database.")
-		// 			} // end if
-		// 			// else insert the article into the collection
-		// 			else {
-		// 				db.articles.insert(scrappedResult);
-		// 				console.log(scrappedResult);
-		// 			} // end else
-		// 		});
-		// 	}); // end forEach
-
-			
-
-		// }); // end of articles.find title: thisTitle
 
 	}); // end of title and url scrape
 
@@ -104,7 +87,7 @@ request("http://www.nytimes.com/", function (error, response, html) {
 				} // end if
 				// else insert the article into the collection
 				else {
-
+					console.log(doc);
 					db.articles.insert(doc);
 				} // end else
 				
@@ -112,68 +95,56 @@ request("http://www.nytimes.com/", function (error, response, html) {
 		})(result[i]);
 
 	} // end of for loop
-		
-		// for (var k = 1; k < result.length; k++) {
-
-		// thisTitle = result[k].title;
-		// console.log(thisTitle);
-		// db.articles.find({title: thisTitle}, function (err, docs) {
-			
-		// 	// if there is no article with thisTitle insert the article into the collection
-		// 	if (err || !docs) db.articles.insert(result[k]);
-			
-		// 	// else the article title is already in the collection don't insert it
-		// 	else console.log("This article is already in the database.");			
-
-		// }); // end of articles.find title: thisTitle
 
 }); // end of request samdavidson.net
 
+
+//****************************
+
+
+
 //routes
+
+// main route to react webpage
 app.get('/', function(req, res) {
 
-	db.articles.find({}, function(err, posts) {
+	res.sendFile('./assets/index.html');
 
-		res.render('home', {
-			layout: 'main', 
-			result: posts
-		}); //end of res.render
+}); // end of app.get /
 
-	}); // end of db.articles.find
-}); // end of app.get
+// incoming data from database
 
-app.post('/comments', function(req, res) {
+app.get('/api/', function(req, res) {
 
-	var comment = req.body;
-	console.log(comment);
+}); // end of api get request
 
+// post new data to database
+app.post('/api/', function(req, res) {
 
+	var article = req.body;
 
-	// update the database with the new comment
-	db.articles.update({"title": comment.dataTitle}, {$addToSet: {comments: {comment: comment.comment, title: comment.dataTitle}}}, function(err, docs) {
-		if (err) console.log(err);
-		console.log(docs);
+	console.log(article);
 
-		
+	db.articles.insert(article, function(err) {
+		if (err) throw err;
 
-	}); // end db.articles.update()
+	}); // end of insert article
 
-}); // end of app.post comment
+}); // end of app.post api
 
-app.post('/delete', function(req, res) {
-	
-	// set the comment to delete details in a variable
-	var deleteComment = req.body;
-	console.log(deleteComment);
+// delete article from database
 
-	// delete the comment form the database
-	db.articles.update({"title": deleteComment.dataTitle}, {$pull: {comments: {comment: deleteComment.comment}}}, function(err, docs) {
+app.delete('/api/', function(req, res) {
+
+	var article = req.body;
+
+	db.articles.update({$pull: {"title": article.title}}, function(err, docs) {
 
 		console.log(docs);
 
 	}); // end db.articles.update()
 
-}); // end app.post('/delete')
+}); // end of app.delete /api/
 
 // port for local server to use
 var PORT = process.env.PORT || 3000;
